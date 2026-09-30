@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!-- Dashboard page. Flask serves this file; JavaScript below fetches /api/data
+     every 2 seconds and redraws the numbers and the chart. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Machine Monitor Dashboard</title>
+  <!-- Chart.js = a library that draws charts (loaded from the internet) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0;
+           margin: 0; padding: 20px; }
+    h1 { margin-top: 0; }
+    .cards { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+    .card { background: #1e293b; border-radius: 10px; padding: 16px 24px; min-width: 180px; }
+    .card .label { color: #94a3b8; font-size: 14px; }
+    .card .value { font-size: 36px; font-weight: bold; margin-top: 6px; }
+    .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%;
+           background: #ef4444; margin-right: 6px; }
+    .dot.on { background: #22c55e; }
+    .chart-box { background: #1e293b; border-radius: 10px; padding: 16px; max-width: 900px; }
+  </style>
+</head>
+<body>
+  <h1>Machine Monitor</h1>
+
+  <!-- The number cards. JavaScript fills the empty spans by their id. -->
+  <div class="cards">
+    <div class="card"><div class="label">AWS connection</div>
+      <div class="value" style="font-size:20px"><span id="dot" class="dot"></span><span id="conn">waiting...</span></div></div>
+    <div class="card"><div class="label">Device</div><div class="value" id="device" style="font-size:20px">-</div></div>
+    <div class="card"><div class="label">Light intensity</div><div class="value"><span id="pct">--</span> %</div></div>
+    <div class="card"><div class="label">Raw ADC (0-4095)</div><div class="value" id="raw">--</div></div>
+  </div>
+
+  <div class="chart-box"><canvas id="chart"></canvas></div>
+
+  <script>
+    // Create an empty line chart. We push data into it later.
+    const chart = new Chart(document.getElementById('chart'), {
+      type: 'line',
+      data: { labels: [], datasets: [{ label: 'Light intensity (%)', data: [],
+                                       borderColor: '#38bdf8', tension: 0.3 }] },
+      options: { animation: false,
+                 scales: { y: { min: 0, max: 100 },
+                           x: { ticks: { maxTicksLimit: 8 } } } }
+    });
+
+    // Ask Flask for the latest data and update the page.
+    async function refresh() {
+      try {
+        const res = await fetch('/api/data');
+        const data = await res.json();          // {connected: true, readings: [...]}
+
+        document.getElementById('conn').textContent = data.connected ? 'connected' : 'disconnected';
+        document.getElementById('dot').className = 'dot' + (data.connected ? ' on' : '');
+
+        if (data.readings.length > 0) {
+          const last = data.readings[data.readings.length - 1];   // newest reading
+          document.getElementById('pct').textContent = last.light_intensity_pct;
+          document.getElementById('raw').textContent = last.light_intensity_raw;
+          document.getElementById('device').textContent = last.device_id;
+        }
+
+        // Chart: x axis = time received, y axis = light %.
+        chart.data.labels = data.readings.map(r => new Date(r.ts * 1000).toLocaleTimeString());
+        chart.data.datasets[0].data = data.readings.map(r => r.light_intensity_pct);
+        chart.update();
+      } catch (err) {
+        console.log('Could not reach Flask server', err);
+      }
+    }
+
+    refresh();                     // run once right away
+    setInterval(refresh, 2000);    // then every 2000 ms
+  </script>
+</body>
+</html>

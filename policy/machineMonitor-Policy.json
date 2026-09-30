@@ -1,0 +1,60 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Publish",
+        "iot:Receive",
+        "iot:PublishRetain"
+      ],
+      "Resource": [
+        "arn:aws:iot:us-east-1:854469103153:topic/sdk/test/java",
+        "arn:aws:iot:us-east-1:854469103153:topic/sdk/test/python",
+        "arn:aws:iot:us-east-1:854469103153:topic/sdk/test/js"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Subscribe"
+      ],
+      "Resource": [
+        "arn:aws:iot:us-east-1:854469103153:topicfilter/sdk/test/java",
+        "arn:aws:iot:us-east-1:854469103153:topicfilter/sdk/test/python",
+        "arn:aws:iot:us-east-1:854469103153:topicfilter/sdk/test/js"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Connect"
+      ],
+      "Resource": [
+        "arn:aws:iot:us-east-1:854469103153:client/sdk-java",
+        "arn:aws:iot:us-east-1:854469103153:client/basicPubSub",
+        "arn:aws:iot:us-east-1:854469103153:client/sdk-nodejs-*",
+        "arn:aws:iot:us-east-1:854469103153:client/machineMonitor"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iot:Publish",
+      "Resource": "arn:aws:iot:us-east-1:854469103153:topic/factory/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Subscribe"
+      ],
+      "Resource": "arn:aws:iot:us-east-1:854469103153:topicfilter/factory/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Receive"
+      ],
+      "Resource": "arn:aws:iot:us-east-1:854469103153:topic/factory/*"
+    }
+  ]
+}

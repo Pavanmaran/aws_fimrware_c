@@ -1,0 +1,10 @@
+# NEVER commit device certificates / keys
+*.pem
+*.key
+*.crt
+*.cert
+# downloaded SDK (start.ps1 clones it)
+aws-iot-device-sdk-python-v2/
+__pycache__/
+.pio/
+.vscode/
